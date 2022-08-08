@@ -1,12 +1,69 @@
-import React from "react";
+import React, {useState, useLayoutEffect} from "react";
 import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import Colors from "../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import ToDoItem from "../components/ToDoItem";
 
-export default () => {
+const renderAddListIcon = (addItem) => {
+    return (
+        <TouchableOpacity style={{flex:1}} onPress={() => addItem({text: "", isChecked: false, isNewItem: true})}>
+            <Text style={styles.icon}>+</Text>
+
+        </TouchableOpacity>
+    )
+}
+
+export default ({navigation}) => {
+    const [toDoItems, setToDoItems] = useState([{text: "hello", isChecked: false}])
+
+    const addItemToLists = (item) => {
+        toDoItems.push(item);
+        setToDoItems([...toDoItems]);
+    }
+
+    const removeItemFromLists = (index) => {
+        toDoItems.splice(index, 1);
+        setToDoItems([...toDoItems]);
+    }
+
+    const updateItem = (index, item) => {
+        toDoItems[index] = item;
+        setToDoItems([...toDoItems]);
+    }
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => renderAddListIcon(addItemToLists)
+        })
+    })
+
     return (<View style={styles.container}>
-        <Text>ToDoList</Text>
-         </View>);
+        <FlatList
+            data={toDoItems}
+            renderItem={({ item: {text, isChecked, isNewItem}, index }) => {
+                return <ToDoItem 
+                text={text} 
+                isChecked={isChecked} 
+                isNewItem={isNewItem}
+                onChecked={() => {
+                    const toDoItem = toDoItems[index];
+                    toDoItem.isChecked = !isChecked;
+                    updateItem(index,toDoItem);
+                }}
+                onChangeText={(newText) => {
+                    const toDoItem = toDoItems[index];
+                    toDoItem.text = newText;
+                    updateItem(index,toDoItem);
+                }}
+                onDelete={() => {
+                    removeItemFromLists(index)
+                }}
+                />
+            }}
+            keyExtractor={(item, index) => index.toString()}
+        />
+         </View>
+         );
 }
 
 const styles = StyleSheet.create({

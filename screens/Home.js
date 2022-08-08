@@ -85,6 +85,7 @@ export default ({navigation}) => {
                     );
 
                 }}
+                keyExtractor={(item, index) => index.toString()}
             />
 
         </View>
